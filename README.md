@@ -1,7 +1,5 @@
 # GPX Visualize
 
----
-
 A simple visualization for GPS tracks with a dark and light theme.
 
 
