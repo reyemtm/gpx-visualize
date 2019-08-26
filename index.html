@@ -19,7 +19,7 @@
         padding: 0;
         background-color: #121212;
       }
-      #map, .map {
+      #map {
         position: absolute;
         top: 5%;
         height: calc(100vh - 20%);
@@ -141,12 +141,12 @@
       </div>
     </div>
     <div id="print" class="map" style="visibility: none;"></div>
-    <script src="/js/togeojson.js"></script>
-    <script src="/js/mapbox-gl.js"></script>
-    <script src="/js/2.7.3.Chart.min.js"></script>
-    <script src="/js/2.23.0.moment.min.js"></script>
-    <script src="/js/5.turf.min.js"></script>
-    <script src="/js/html2canvas.min.js"></script>
+    <script src="js/togeojson.js"></script>
+    <script src="js/mapbox-gl.js"></script>
+    <script src="js/2.7.3.Chart.min.js"></script>
+    <script src="js/2.23.0.moment.min.js"></script>
+    <script src="js/5.turf.min.js"></script>
+    <script src="js/html2canvas.min.js"></script>
     <script>
       /**
        * TO DO
@@ -158,7 +158,7 @@
 
       var params = new URLSearchParams(window.location.search);  
       var theme = (!params.get("theme")) ? "light" : params.get("theme");
-      var ride = (!params.get("ride")) ? "/data/Pauls-Farm-II.gpx" : params.get("ride");
+      var ride = (!params.get("ride")) ? "data/Pauls-Farm-II.gpx" : params.get("ride");
       
       console.log("pulling ride from", ride)
       console.log("using the", theme, "theme")
