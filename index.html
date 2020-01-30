@@ -268,27 +268,29 @@
 
       function initMap(geojson, smoothed, bounds, center) {
         console.log("initializing map")
+        mapbox.accessToken = 'pk.eyJ1IjoicmV5ZW10bSIsImEiOiJjazYwdDJmaGYwN2FqM2VvNWNmZm5yZ2l4In0.KB9s_fCNYjbKhHTbPQpkNQ';
         map = new mapboxgl.Map({
           container: "map",
-          style: {
-            version: 8,
-            name: "blank",
-            sources: {
-              none: {
-                type: "vector",
-                url: ""
-              }
-            },
-            layers: [
-              {
-                id: "background",
-                type: "background",
-                paint: {
-                  "background-color": "transparent"
-                }
-              }
-            ]
-          },
+//           style: {
+//             version: 8,
+//             name: "blank",
+//             sources: {
+//               none: {
+//                 type: "vector",
+//                 url: ""
+//               }
+//             },
+//             layers: [
+//               {
+//                 id: "background",
+//                 type: "background",
+//                 paint: {
+//                   "background-color": "transparent"
+//                 }
+//               }
+//             ]
+//           },
+          style: "mapbox://styles/reyemtm/ciufnr1q400912jmo87s45bed",
           debug: 2,
           center: center.geometry.coordinates,
           zoom: 12,
