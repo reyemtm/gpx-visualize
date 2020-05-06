@@ -170,6 +170,7 @@
       var params = new URLSearchParams(window.location.search);  
       var theme = (!params.get("theme")) ? "light" : params.get("theme");
       var ride = (!params.get("ride")) ? "data/Pauls-Farm-II.gpx" : params.get("ride");
+      var style = (!params.get("style")) ? "mapbox://styles/reyemtm/ciufnr1q400912jmo87s45bed" : params.get("style");
       
       console.log("pulling ride from", ride)
       console.log("using the", theme, "theme")
@@ -290,7 +291,7 @@
 //               }
 //             ]
 //           },
-          style: "mapbox://styles/reyemtm/ciufnr1q400912jmo87s45bed",
+          style: style,
           debug: 2,
           center: center.geometry.coordinates,
           zoom: 12,
