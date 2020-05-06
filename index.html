@@ -302,6 +302,7 @@
         /*End Blank Map*/
 
         map.on("load", function() {
+          if (theme === "light") map.setPaintProperty("background", "background-color", "#fff");
           
           console.log("map loaded");
 
