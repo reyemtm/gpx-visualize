@@ -306,7 +306,9 @@
           
           console.log("map loaded");
 
-          map.fitBounds(bounds);
+          map.fitBounds(bounds, {
+            padding: 100
+          });
 
           map.addSource("tracksource", {
             type: "geojson",
