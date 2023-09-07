@@ -5,25 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>GPX Visualize</title>
-    
+
     <!-- OPENGRAPH FROM https://smallseotools.com/open-graph-generator/-->
-    <meta property="og:title" content="GPX Visualize">
-    <meta property="og:site_name" content="getbounds">
-    <meta property="og:url" content="https://www.getbounds.com">
-    <meta property="og:description" content="A simple visualization tool for GPS tracks with a dark and light theme. This is a project of getBounds | Malcolm Meyer.">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="https://reyemtm.github.io/gpx-visualize/dark.png">
-    <meta property="og:image" content="https://reyemtm.github.io/gpx-visualize/light.png">
-    
-    
+    <meta property="og:title" content="GPX Visualize" />
+    <meta property="og:site_name" content="getbounds" />
+    <meta property="og:url" content="https://www.getbounds.com" />
+    <meta
+      property="og:description"
+      content="A simple visualization tool for GPS tracks with a dark and light theme. This is a project of getBounds | Malcolm Meyer."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://reyemtm.github.io/gpx-visualize/dark.png" />
+    <meta property="og:image" content="https://reyemtm.github.io/gpx-visualize/light.png" />
+
     <!-- <link
       rel="stylesheet"
       href="https://api.tiles.mapbox.com/mapbox-gl-js/1.2.1/mapbox-gl.css"
     /> -->
-    <link
-      href="https://fonts.googleapis.com/css?family=Orbitron|Staatliches"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css?family=Orbitron|Staatliches" rel="stylesheet" />
     <style>
       body {
         margin: 0;
@@ -40,13 +39,13 @@
       #map-info-right {
         position: absolute;
         padding: 0 1rem;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
         font-family: Staatliches;
         font-size: 4rem;
         line-height: 6rem;
         z-index: 1000;
-        background-color: rgba(255,255,255,0.08);
+        background-color: rgba(255, 255, 255, 0.08);
         margin: 1rem;
         border-radius: 0.5rem;
       }
@@ -75,7 +74,8 @@
         #map {
           top: 15%;
         }
-        #map-info-right, #map-info-left {
+        #map-info-right,
+        #map-info-left {
           width: calc(100vw - 3rem);
         }
         #map-info-right {
@@ -133,8 +133,8 @@
         color: #000;
       }
       #print {
-        width: 2268px!important;
-        height: 1600px!important;
+        width: 2268px !important;
+        height: 1600px !important;
         display: none;
       }
     </style>
@@ -143,382 +143,22 @@
   <body>
     <div id="map-info-left">TIME 00:00:00</div>
     <div id="map-info-right">TOTAL TIME 00:00:00</div>
-    <div id="map">
-    </div>
+    <div id="map"></div>
     <div id="map-chart"><canvas id="chart" height="30"></canvas></div>
     <div id="modal" class="modal-window">
       <div id="snapshot">
         <a href="#" title="Close" class="modal-close">Close</a>
       </div>
     </div>
-    <div id="print" class="map" style="visibility: none;"></div>
+    <div id="print" class="map" style="visibility: none"></div>
     <script src="js/togeojson.js"></script>
     <script src="js/mapbox-gl.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/mapbox-gl/3.0.0-beta.2/mapbox-gl.js" integrity="sha512-u3clRHm4H8gnTKleDcTI2ijRwXIJVjnoWipkYPnN7FBqE31O+4kw1g+nTgdZeCYzjpYT4EfwoG3CrVADKa8ePQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
     <script src="js/2.7.3.Chart.min.js"></script>
     <script src="js/2.23.0.moment.min.js"></script>
-    <script src="js/5.turf.min.js"></script>
+    <!-- <script src="js/5.turf.min.js"></script> -->
     <script src="js/html2canvas.min.js"></script>
-    <script>
-      /**
-       * TO DO
-       * Add ride sidebar or minimap with list/map of rides
-       * Add minimap
-       * Turf Simplify line to make them more smooth
-       * Make everything a function so I can pass in each ride
-       */
-
-      var params = new URLSearchParams(window.location.search);  
-      var theme = (!params.get("theme")) ? "light" : params.get("theme");
-      var ride = (!params.get("ride")) ? "data/Pauls-Farm-II.gpx" : params.get("ride");
-      var style = (!params.get("style")) ? "mapbox://styles/reyemtm/ciufnr1q400912jmo87s45bed" : params.get("style");
-      
-      console.log("pulling ride from", ride)
-      console.log("using the", theme, "theme")
-
-      var themes = {
-        dark: {
-          mainColor: "#121212",
-          fontColor: "rgba(255,255,255,0.87)",
-          trackColor: "#03dac5",
-          chartColor: "rgba(3, 218, 197, 0.4)"
-        },
-        light: {
-          mainColor: "#fff",
-          fontColor: "#121212",
-          trackColor: "rgba(178, 34, 34,0.8)",
-          chartColor: "rgba(178, 34, 34,0.4)"
-        }
-      }
-
-      document.body.style.backgroundColor = themes[theme].mainColor;
-      document.body.style.background = themes[theme].mainColor;
-      document.body.style.color = themes[theme].fontColor;
-
-      var map, myLineChart;
-      var infoleft = document.getElementById("map-info-left");
-      var inforight = document.getElementById("map-info-right");
-
-      inforight.addEventListener("click", function() {
-        var width = window.outerWidth;
-        var height = window.outerHeight;
-        html2canvas(document.querySelector("body"), {
-          // width: width,
-          // height: height
-          backgroundColor: themes[theme].mainColor
-        }).then(canvas => {
-          // document.querySelector("#snapshot").appendChild(canvas);
-          var imageUrl = canvas.toDataURL();
-          var img = document.createElement('img');
-          img.src = imageUrl;
-          var snapshot = document.querySelector("#snapshot");
-          if (snapshot.children[1]) {
-            snapshot.children[1].src = imageUrl
-          }else{
-            snapshot.appendChild(img);
-          }
-          window.location.hash = "#modal";
-        });
-      });
-
-      fetch(ride)
-        .then(function(response) {
-          return response.text();
-        })
-        .then(function(gpx) {
-          var parser = new DOMParser();
-          var xml = parser.parseFromString(gpx, "text/xml");
-          var geojson = toGeoJSON.gpx(xml);
-          // console.log(geojson);
-          if (geojson.features[0].geometry.coordinates[0] && geojson.features[0].geometry.coordinates[0].length < 3) {
-            alert("The GPX file does not appear to contain elevation data.")
-            return
-          }
-          var length = turf.length(geojson, {unit: "miles"});
-
-          if (geojson.features[0].properties.coordTimes) {
-            var coords = geojson.features[0].properties.coordTimes;
-            var l = coords.length - 1;
-            var timestart = coords[0];
-            var timeend = coords[l];
-            var totalseconds =
-              Math.floor(new Date(timeend).getTime()) -
-              Math.floor(new Date(timestart));
-            var totaltime = moment.utc(totalseconds).format("HH:mm:ss");
-            // inforight.innerHTML = "TOTAL TIME " + totaltime + "<br>&nbsp;";
-            inforight.innerHTML = "TOTAL TIME " + totaltime +"<br>Distance " + length.toFixed(2) + " mi*";
-          }else{
-            inforight.innerHTML = "Missing Timestamps<br>Distance " + length.toFixed(2) + " mi*"
-          }
-
-
-
-
-          // var bezier = turf.bezierSpline(geojson.features[0], {
-          //   sharpness: 0.8
-          // });
-          // console.log(bezier);
-          var bbox = turf.bbox(geojson);
-          var bboxPoly = turf.bboxPolygon(bbox);
-          var center = turf.center(bboxPoly);
-          var bufferDist = length * 0.03;
-          var buffer = turf.buffer(bboxPoly, bufferDist, {units: "miles"});
-          var newbbox = turf.bbox(buffer)
-          initMap(geojson, geojson, newbbox, center);
-          initChart("chart", geojson, geojson);
-        });
-
-      function initMap(geojson, smoothed, bounds, center) {
-        console.log("initializing map")
-        mapboxgl.accessToken = 'pk.eyJ1IjoicmV5ZW10bSIsImEiOiJjazYwdDJmaGYwN2FqM2VvNWNmZm5yZ2l4In0.KB9s_fCNYjbKhHTbPQpkNQ';
-        map = new mapboxgl.Map({
-          container: "map",
-//           style: {
-//             version: 8,
-//             name: "blank",
-//             sources: {
-//               none: {
-//                 type: "vector",
-//                 url: ""
-//               }
-//             },
-//             layers: [
-//               {
-//                 id: "background",
-//                 type: "background",
-//                 paint: {
-//                   "background-color": "transparent"
-//                 }
-//               }
-//             ]
-//           },
-          style: style,
-          debug: 2,
-          center: center.geometry.coordinates,
-          zoom: 12,
-          interactive: false,
-          preserveDrawingBuffer: true
-        });
-        // map.addControl(new mapboxgl.NavigationControl());
-
-        /*End Blank Map*/
-
-        map.on("load", function() {
-          if (theme === "light") map.setPaintProperty("background", "background-color", "#fff");
-          
-          console.log("map loaded");
-
-          map.fitBounds(bounds, {
-            padding: 120
-          });
-
-          map.addSource("tracksource", {
-            type: "geojson",
-            data: geojson,
-            generateId: true
-          });
-
-          map.addLayer({
-            id: "track",
-            type: "line",
-            source: "tracksource",
-            paint: {
-              "line-color": themes[theme].trackColor,
-              "line-width": 4
-            }
-          });
-
-          var trackPoints = {
-            type: "FeatureCollection",
-            features: []
-          };
-          
-          for (var i = 0; i < geojson.features[0].geometry.coordinates.length; i++) {
-            var f = geojson.features[0].geometry.coordinates[i]
-            trackPoints.features.push(turf.point(f))
-          }
-
-          turf.explode(geojson);
-          // console.log(trackPoints)
-          map.addSource("track-points-source", {
-            type: "geojson",
-            data: trackPoints,
-            generateId: true
-          });
-
-          map.addLayer({
-            id: "track-points",
-            type: "circle",
-            source: "track-points-source",
-            paint: {
-              "circle-color": "transparent",
-              "circle-radius": 10
-            }
-          });
-
-          var points = {
-            type: "FeatureCollection",
-            features: []
-          };
-          map.addSource("chart-point-source", {
-            type: "geojson",
-            data: points
-          });
-
-          map.addLayer({
-            id: "chart-point",
-            type: "circle",
-            source: "chart-point-source",
-            paint: {
-              "circle-color": themes[theme].trackColor,
-              "circle-stroke-color": "rgba(255,255,255,0.6)",
-              "circle-stroke-width": 4,
-              "circle-radius": 6,
-              "circle-blur": 0.1
-            }
-          });
-
-          initMapEventListeners(map);
-        });
-      }
-
-
-
-      function initChart(div, geojson, bezier) {
-        var data = [];
-        geojson.features[0].geometry.coordinates.map(function(c) {
-          data.push(c[2]);
-        });
-        var labelsArray = [];
-        for (var n = 0; n < data.length; n++) {
-          labelsArray.push(n);
-        }
-        var gpxchart = document.getElementById(div);
-        // gpxchart.onclick = function(evt) {
-
-        // }
-        myLineChart = new Chart(gpxchart, {
-          type: "line",
-          data: {
-            labels: labelsArray,
-            datasets: [
-              {
-                label: " GPS Track",
-                backgroundColor: themes[theme].chartColor,
-                backgroundOpacity: 0.5,
-                borderColor: themes[theme].trackColor,
-                borderWidth: 2,
-                pointRadius: 0,
-                pointHitRadius: 4,
-                data: data
-              }
-            ]
-          },
-          options: {
-            onHover: function(e) {
-              var point = myLineChart.getElementAtEvent(e);
-              // console.log(point)
-              if (point.length > 0) {
-                var index = point[0]["_index"];
-                // console.log(index)
-                var trackpoint =
-                  geojson.features[0].geometry.coordinates[index];
-
-                /* show elevation and track time */
-                var elev = trackpoint[2];
-                if (geojson.features[0].properties.coordTimes) {
-                  var timestart = geojson.features[0].properties.coordTimes[0];
-                  var timenow = geojson.features[0].properties.coordTimes[index];
-                  // console.log(timenow);
-                  var seconds =
-                    Math.floor(new Date(timenow).getTime()) -
-                    Math.floor(new Date(timestart));
-                  var minutes = moment.utc(seconds).format("HH:mm:ss");
-                  // console.log(minutes);
-                  infoleft.innerHTML =
-                    "Time " + minutes + "<br> ELEV " + trackpoint[2] + "'";
-                }else{
-                  infoleft.innerHTML =
-                    "Time 00:0000<br> ELEV " + trackpoint[2] + "'"; 
-                }
-
-
-                /* show point on map line */
-                map
-                  .getSource("chart-point-source")
-                  .setData(turf.point(trackpoint));
-                // console.log(myLineChart.getDatasetMeta(2))
-              }
-            },
-            tooltips: {
-              enabled: false,
-              mode: "nearest",
-              intersect: true,
-              position: "nearest",
-              titleFontColor: "transparent",
-              titleMarginBottom: -10,
-              bodyFontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif'
-            },
-            legend: {
-              display: false
-            },
-            scales: {
-              xAxes: [
-                {
-                  display: false
-                }
-              ],
-              yAxes: [
-                {
-                  fontFamily: "Segoe UI",
-                  display: false,
-                  ticks: {
-                    // Include a dollar sign in the ticks
-                    callback: function(value, index, values) {
-                      return value + "ft";
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        });
-      }
-
-      function initMapEventListeners() {
-        var $map = this.map;
-        $map.on("zoomend", e => {
-          // zoom.innerHTML = 'zoom: ' + (map.getZoom()).toFixed(2);
-          if (map.getZoom() < 14) {
-            // zoom.style.backgroundColor = 'red'
-          } else {
-            // zoom.style.backgroundColor = 'transparent'
-          }
-        });
-        // $map.on("click", "track", e => console.log(map.queryRenderedFeatures(e.point)));
-        $map.on("mousemove", e => {
-          var features = map.queryRenderedFeatures(e.point, {layers: ["track-points"]});
-          if (features.length > 0) {
-            // console.log("move")
-            var featureIndex = features[0];
-            // console.log(featureIndex)
-            var meta = myLineChart.getDatasetMeta(0),
-              rect = myLineChart.canvas.getBoundingClientRect(),
-              point = meta.data[featureIndex.id].getCenterPoint(),
-              evt = new MouseEvent("mousemove", {
-                clientX: rect.left + point.x,
-                clientY: rect.top + point.y
-              });
-              // console.log(evt)
-              node = myLineChart.canvas;
-            node.dispatchEvent(evt);
-          }
-          map.getCanvas().style.cursor = "pointer";
-        });
-        $map.on("mouseleave", "track", e => {
-          map.getCanvas().style.cursor = "";
-        });
-      }
-      /* trigger click event on chart https://stackoverflow.com/questions/53764367/how-to-trigger-hover-programmatically-in-chartjs*/
-    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js' integrity='sha512-Q7HOppxoH0L2M7hreVoFCtUZimR2YaY0fBewIYzkCgmNtgOOZ5IgMNYxHgfps0qrO1ef5m7L1FeHrhXlq1I9HA==' crossorigin='anonymous'></script>
+    <script src="./app.js"></script>
   </body>
 </html>
